@@ -1,5 +1,10 @@
 import pandas as pd
 import requests
+import yaml
+
+from envelopes import Envelope
+
+mailing_list = [('michaelaquilina@gmail.com', 'Michael Aquilina')]
 
 # Line for which to retrieve the status
 lines = ['jubilee', 'bakerloo', 'metropolitan', 'circle', 'hammersmith-city']
@@ -20,5 +25,15 @@ if r.ok:
 
     del data['lineStatuses']
     print data
+
+    env = Envelope(
+        to_addr=mailing_list,
+        from_addr=('my.tube.notifier@gmail.com', 'Tube Notifier'),
+        subject='Today\'s Tube Status',
+        html_body=data.to_html()
+    )
+
+    config = yaml.load(open('config.yml'))
+    env.send(**config)
 else:
     print 'Error obtaining necessary data'
