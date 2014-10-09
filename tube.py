@@ -37,8 +37,8 @@ if r.ok:
 
     t = jinja2.Template('''
         <p>The Tube Status for {{ today.strftime('%A %d %B %Y') }}</p>
-        <table border="1">
-            <tr>
+        <table style="border: 1px solid #555555; width: 500px">
+            <tr style="color: #ffffff; padding: 3px; background-color: #555555">
                 <th>Line</th>
                 <th>Status</th>
                 <th>Details</th>
