@@ -2,3 +2,4 @@ envelopes
 pyyaml
 requests
 pandas
+jinja2
