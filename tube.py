@@ -18,6 +18,8 @@ detail = True
 # http://api.tfl.gov.uk/
 r = requests.get('http://api.tfl.gov.uk/line/{}/Status?detail={}'.format(','.join(lines), detail))
 
+disruptions = []
+
 if r.ok:
     data = pd.DataFrame(r.json(), columns=['id', 'name', 'lineStatuses'])
     data['status'] = ''
@@ -31,12 +33,13 @@ if r.ok:
 
         if 'disruption' in status[0]:
             data.ix[index]['disruption'] = status[0]['disruption']['category']
+            disruptions.append(status[0]['disruption']['description'])
 
     del data['lineStatuses']
     print data
 
     t = jinja2.Template('''
-        <p>The Tube Status for {{ today.strftime('%A %d %B %Y') }}</p>
+        <h3>The Tube Status for {{ today.strftime('%A %d %B %Y') }}</h3>
         <table style="border: 1px solid #555555; width: 500px">
             <tr style="color: #ffffff; padding: 3px; background-color: #555555">
                 <th>Line</th>
@@ -51,13 +54,19 @@ if r.ok:
             </tr>
             {% endfor %}
         </table>
+        {% if disruptions %}
+            <h3>Disruptions</h3>
+            {% for d in disruptions %}
+                <p>{{ d }}</p>
+            {% endfor %}
+        {% endif %}
     ''')
 
     env = Envelope(
         to_addr=mailing_list,
         from_addr=('my.tube.notifier@gmail.com', 'Tube Notifier'),
         subject='Today\'s Tube Status',
-        html_body=t.render(data=data, today=datetime.now())
+        html_body=t.render(data=data, today=datetime.now(), disruptions=disruptions)
     )
 
     config = yaml.load(open('config.yml'))
