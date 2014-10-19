@@ -8,10 +8,12 @@ import requests
 
 from envelopes import Envelope
 
-mailing_list = [('michaelaquilina@gmail.com', 'Michael Aquilina')]
+config = yaml.load(open('config.yml'))
 
-# Line for which to retrieve the status
-lines = ['jubilee', 'bakerloo', 'metropolitan', 'circle', 'hammersmith-city']
+# Load Configuration Options
+lines = config['lines']
+mail_to = config['mail_to']
+mail = config['mail']
 
 detail = True
 
@@ -60,13 +62,12 @@ if r.ok:
     ''')
 
     env = Envelope(
-        to_addr=mailing_list,
+        to_addr=mail_to,
         from_addr=('my.tube.notifier@gmail.com', 'Tube Notifier'),
         subject='Today\'s Tube Status',
         html_body=t.render(data=data, today=datetime.now(), reasons=reasons)
     )
 
-    config = yaml.load(open('config.yml'))
-    env.send(**config)
+    env.send(**mail)
 else:
     print 'Error obtaining necessary data'
